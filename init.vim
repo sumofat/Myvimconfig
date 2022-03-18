@@ -1,4 +1,4 @@
-
+"    
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
 
@@ -66,8 +66,9 @@ set tabstop=4
 " when indenting with '>', use 4 spaces width
 set shiftwidth=4
 
+set noexpandtab
 " On pressing tab, insert 4 spaces
-set expandtab
+"set expandtab
 
 set autoindent              " indent a new line the same amount as the line just typed
 filetype plugin indent on   "allow auto-indenting depending on file type
@@ -112,8 +113,8 @@ call plug#begin('~/.config/nvim')
     Plug 'Tetralux/odin.vim'
     
     " For luasnip users.
-"    Plug 'L3MON4D3/LuaSnip'
-"    Plug 'saadparwaiz1/cmp_luasnip'
+    Plug 'L3MON4D3/LuaSnip'
+    Plug 'saadparwaiz1/cmp_luasnip'
 
     " For ultisnips users.
     " Plug 'SirVer/ultisnips'
@@ -134,10 +135,9 @@ call plug#begin('~/.config/nvim')
     " For vsnip users.
     Plug 'hrsh7th/cmp-vsnip'
     Plug 'hrsh7th/vim-vsnip'
-    
+     Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }       
     call plug#end()
 " }}}
-
 "COLOR SCHEME\
 set background=dark
 colorscheme onedark
