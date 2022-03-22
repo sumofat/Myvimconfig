@@ -69,20 +69,18 @@ set shiftwidth=4
 set noexpandtab
 " On pressing tab, insert 4 spaces
 "set expandtab
-
+set relativenumber
 set autoindent              " indent a new line the same amount as the line just typed
 filetype plugin indent on   "allow auto-indenting depending on file type
 " There are certain files that we would never want to edit with Vim.
 " Wildmenu will ignore files with these extensions.
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 
-
-
-inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+"inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+"inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+"inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 " Show commits for every source line
-nnoremap <Leader>gb :Gblame<CR>  " git blame
+"nnoremap <Leader>gb :Gblame<CR>  " git blame
 
 " Find files using Telescope command-line sugar.
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
@@ -102,6 +100,8 @@ call plug#begin('~/.config/nvim')
 	Plug 'prabirshrestha/asyncomplete.vim'	
     Plug 'airblade/vim-gitgutter'
     Plug 'tpope/vim-fugitive'
+	Plug 'vim-airline/vim-airline'
+
     Plug 'tpope/vim-rhubarb'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
@@ -145,25 +145,30 @@ colorscheme onedark
 "lua print('this also works')
 lua require('user.options')
 lua require('user.keymaps')
-
-
+set makeprg=odin\ build\ main.odin
+set errorformat=%f(%l:%c)\ %*[^:]:\ %m
+"autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 "LuaSnipSetup
 " press <Tab> to expand or jump in a snippet. These can also be mapped separately
 " via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
-imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
+"imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
 " -1 for jumping backwards.
-inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
+"inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
 
-snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
-snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
+"snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
+"snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
 
 " For changing choices in choiceNodes (not strictly necessary for a basic setup).
 imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
 smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
 
-set completeopt=menu,menuone,noselect
+let Hello = luaeval('require("user.keymaps")').OpenWindow
 
+"nn <C-d> :lua require("user.keymaps").OpenWindow()<CR>
+nnoremap <silent> <Leader>c :<C-u>call Hello()<CR>
+set completeopt=menu,menuone,noselect
 lua <<EOF
+
 require("luasnip.loaders.from_vscode").lazy_load()
 -- You dont need to set any of these options. These are the default ones. Only
    -- the loading is important
@@ -208,8 +213,8 @@ require("luasnip.loaders.from_vscode").lazy_load()
       ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     },
     sources = cmp.config.sources({
+		{ name = 'nvim_lsp' },
 		{ name = 'luasnip' }, -- For luasnip users.
---		{ name = 'nvim_lsp' },
 --        { name = 'vsnip' }, -- For vsnip users.
       -- { name = 'ultisnips' }, -- For ultisnips users.
       -- { name = 'snippy' }, -- For snippy users.
@@ -218,6 +223,35 @@ require("luasnip.loaders.from_vscode").lazy_load()
     })
   })
 
+	local runtime_path = vim.split(package.path, ';')
+	table.insert(runtime_path, "lua/?.lua")
+	table.insert(runtime_path, "lua/?/init.lua")
+
+	require'lspconfig'.sumneko_lua.setup {
+	  settings = {
+		Lua = {
+		  runtime = {
+			-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+			version = 'LuaJIT',
+			-- Setup your lua path
+			path = runtime_path,
+		  },
+		  diagnostics = {
+			-- Get the language server to recognize the `vim` global
+			globals = {'vim'},
+		  },
+		  workspace = {
+			-- Make the server aware of Neovim runtime files
+			library = vim.api.nvim_get_runtime_file("", true),
+		  },
+		  -- Do not send telemetry data containing a randomized but unique identifier
+		  telemetry = {
+			enable = false,
+		  },
+		},
+	  },
+	}
+	require'lspconfig'.sumneko_lua.setup{}
   -- Set configuration for specific filetype.
  -- cmp.setup.filetype('gitcommit', {
  --  sources = cmp.config.sources({
