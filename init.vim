@@ -136,7 +136,9 @@ call plug#begin('~/.config/nvim')
 "    Plug 'hrsh7th/vim-vsnip'
 	Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }       
 	Plug 'rafamadriz/friendly-snippets'
+	Plug 'tpope/vim-unimpaired'
 call plug#end()
+
 " }}}
 "COLOR SCHEME\
 set background=dark
@@ -146,7 +148,11 @@ colorscheme onedark
 lua require('user.options')
 lua require('user.keymaps')
 set makeprg=odin\ build\ main.odin
-set errorformat=%f(%l:%c)\ %*[^:]:\ %m
+"set errorformat=%f(%l:%c)\ %*[^:]:\ %m
+"Odin error format TODO(Ray):Figure out how to get this to be Odin only.
+set errorformat=%f(%l:%c)\ %m
+
+
 "autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 "LuaSnipSetup
 " press <Tab> to expand or jump in a snippet. These can also be mapped separately
@@ -252,7 +258,44 @@ require("luasnip.loaders.from_vscode").lazy_load()
 	  },
 	}
 	require'lspconfig'.sumneko_lua.setup{}
-  -- Set configuration for specific filetype.
+--Setup odin autocomplete with OLS
+	local lspconfig = require'lspconfig'
+	local configs = require'lspconfig/configs'
+
+	-- Check if it's already defined for when reloading this file.
+	if not lspconfig.ols then
+		configs.ols = {
+			default_config = {
+				cmd = {'ols'};
+				filetypes = {'odin'};
+				root_dir = function(fname)
+				return lspconfig.util.find_git_ancestor(fname) or vim.loop.os_homedir()
+			end;
+			settings = {};
+			};
+		}
+	end
+
+	lspconfig.ols.setup{
+		root_dir = lspconfig.util.root_pattern("ols.json");
+	}
+
+	local nvim_lsp = require('lspconfig')
+	local on_attach = function(client, bufnr)
+
+
+	--buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+	end
+
+-- Use a loop to conveniently both setup defined servers
+-- and map buffer local keybindings when the language server attaches
+	local servers = { "ols" }
+	for _, lsp in ipairs(servers) do
+		nvim_lsp[lsp].setup {
+			on_attach = on_attach;
+			}
+	end
+	-- Set configuration for specific filetype.
  -- cmp.setup.filetype('gitcommit', {
  --  sources = cmp.config.sources({
  --     { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it. 
