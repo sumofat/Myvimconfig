@@ -1,4 +1,7 @@
-"    
+" Enable folding
+set foldmethod=indent
+set foldlevel=99
+autocmd BufEnter * silent! :lcd%:p:h
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
 
@@ -147,7 +150,7 @@ colorscheme onedark
 "lua print('this also works')
 lua require('user.options')
 lua require('user.keymaps')
-set makeprg=odin\ build\ main.odin
+set makeprg=odin\ build\ main.odin\ -debug
 "set errorformat=%f(%l:%c)\ %*[^:]:\ %m
 "Odin error format TODO(Ray):Figure out how to get this to be Odin only.
 set errorformat=%f(%l:%c)\ %m
@@ -156,13 +159,13 @@ set errorformat=%f(%l:%c)\ %m
 "autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 "LuaSnipSetup
 " press <Tab> to expand or jump in a snippet. These can also be mapped separately
-" via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
-"imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
+"via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
+imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
 " -1 for jumping backwards.
-"inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
+inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
 
-"snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
-"snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
+snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
+snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
 
 " For changing choices in choiceNodes (not strictly necessary for a basic setup).
 imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
@@ -173,9 +176,14 @@ let Hello = luaeval('require("user.keymaps")').OpenWindow
 "nn <C-d> :lua require("user.keymaps").OpenWindow()<CR>
 nnoremap <silent> <Leader>c :<C-u>call Hello()<CR>
 set completeopt=menu,menuone,noselect
-lua <<EOF
 
+" LSP REMAPS
+lua <<EOF
 require("luasnip.loaders.from_vscode").lazy_load()
+require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snippets folder
+-- If path is not specified, luasnip will look for the `snippets` directory in rtp (for custom-snippet probably
+-- `~/.config/nvim/snippets`).
+
 -- You dont need to set any of these options. These are the default ones. Only
    -- the loading is important
    require('telescope').setup {
@@ -228,7 +236,6 @@ require("luasnip.loaders.from_vscode").lazy_load()
       { name = 'buffer' },
     })
   })
-
 	local runtime_path = vim.split(package.path, ';')
 	table.insert(runtime_path, "lua/?.lua")
 	table.insert(runtime_path, "lua/?/init.lua")
@@ -281,20 +288,63 @@ require("luasnip.loaders.from_vscode").lazy_load()
 	}
 
 	local nvim_lsp = require('lspconfig')
-	local on_attach = function(client, bufnr)
-
+--	local on_attach = function(client, bufnr)
 
 	--buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-	end
+	
 
 -- Use a loop to conveniently both setup defined servers
 -- and map buffer local keybindings when the language server attaches
-	local servers = { "ols" }
-	for _, lsp in ipairs(servers) do
-		nvim_lsp[lsp].setup {
-			on_attach = on_attach;
-			}
-	end
+--	local servers = { "ols" }
+--	for _, lsp in ipairs(servers) do
+--		nvim_lsp[lsp].setup {
+--			on_attach = on_attach;
+--			}
+--	end
+
+	-- Mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+local opts = { noremap=true, silent=true }
+vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(client, bufnr)
+  -- Enable completion triggered by <c-x><c-o>
+  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+end
+
+-- Use a loop to conveniently call 'setup' on multiple servers and
+-- map buffer local keybindings when the language server attaches
+local servers = { 'pyright', 'rust_analyzer', 'tsserver','ols','sumneko_lua' }
+for _, lsp in pairs(servers) do
+  require('lspconfig')[lsp].setup {
+    on_attach = on_attach,
+    flags = {
+      -- This will be the default in neovim 0.7+
+      debounce_text_changes = 150,
+    }
+  }
+end
 	-- Set configuration for specific filetype.
  -- cmp.setup.filetype('gitcommit', {
  --  sources = cmp.config.sources({

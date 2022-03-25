@@ -1,0 +1,81 @@
+# comment
+snippet for "A basic for loop"
+	for ${1:variable} : ${2:Type} = 0;$1 < ${3:end};$1 += 1{
+			${4:Body}
+	}
+snippet fordo "A for loop with do"
+	for ${1:variable} : ${2:Type} = 0;$1 < ${3:end};$1 += 1{
+		${4:Body}
+	}do{
+		${5:DoBody}
+	}
+snippet forwhile "A while loop"
+	for ${1:variable} ${2:condition} ${3:end}{
+		${4:body}
+	}
+snippet forinf "An infinite loop"
+	for {
+		${1:body}
+	}
+snippet forrange "A ranged based for loop"
+	for ${1:Variable} in ${2:from}..${3:operator} ${4:to}{
+		${5:body}
+	}
+snippet foreach "For iteratables"
+	for ${1:value} in ${2:iterable}{
+		${3:body}
+	}
+snippet foreachindexed "For iterable with index
+	for ${1:value_name},${2:index_name} in ${4:iterable}{
+		${5:body}
+	}
+snippet if "Basic if"
+	if $1{
+		$2
+	}
+snippet ifexecute "Exectute statement before the if"
+	if ${1:statement};${2:condition}{
+		${3:body}
+	}
+snippet proc "Basic proc"
+	${1:name} ::  proc(${2:parameters}){
+		${3:body}
+	}
+snippet procreturn "Basic proc that returns"
+	${1:name} ::  proc(${2:parameters})-> ${3:return}{
+		${4:body}
+	}
+snippet struct "basic struct"
+	${1:name} :: struct{
+		${2:fieldname} : ${3:type},
+	}
+snippet enum "basic enum"
+	${1:name} :: enum{
+		${2:fieldname},
+	}
+snippet union "basic union"
+	${1:name} :: union{
+		${2:fieldname},
+	}
+snippet switch "switch statement"
+	switch ${1:condition}{
+		case ${2:casecondition} :
+			${3:body}
+	}
+snippet switchtype "switch statement on types"
+	switch ${1:value} in ${2:type}{
+		case ${3:casecondition} :
+			${4:body}
+	}
+snippet constdecl "constant declaration"
+	${1:name} : ${2:type} : ${3:value}
+snippet const "Inffered type constant"
+	${1:name} :: ${2:value}
+snippet import "import something"
+	import ${1:name} "${2:package}"
+snippet private "make something private"
+	@(private)
+snippet privatefile "make something private to the file"
+	@(private="file)
+snippet label "labels for jumping"
+	${1:name} : 
