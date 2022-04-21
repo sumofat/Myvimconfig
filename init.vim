@@ -140,6 +140,9 @@ call plug#begin('~/.config/nvim')
 	Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }       
 	Plug 'rafamadriz/friendly-snippets'
 	Plug 'tpope/vim-unimpaired'
+
+	"easy motion
+	Plug 'easymotion/vim-easymotion'
 call plug#end()
 
 " }}}
@@ -150,12 +153,12 @@ colorscheme onedark
 "lua print('this also works')
 lua require('user.options')
 lua require('user.keymaps')
-set makeprg=odin\ build\ main.odin\ -debug
+"set makeprg=odin\ build\ main.odin\ -debug\ -o:minimal
 "set errorformat=%f(%l:%c)\ %*[^:]:\ %m
 "Odin error format TODO(Ray):Figure out how to get this to be Odin only.
-set errorformat=%f(%l:%c)\ %m
+"set errorformat=%f(%l:%c)\ %m
 
-
+au BufRead * try | execute "compiler ".&filetype | catch /./ | endtry
 "autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 "LuaSnipSetup
 " press <Tab> to expand or jump in a snippet. These can also be mapped separately
