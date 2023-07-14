@@ -1,2 +1,2 @@
-set makeprg=odin.exe\ build\ main.odin\ -file\ -debug\ -o:minimal
+set makeprg=make
 set errorformat=%f(%l:%c)\ %m

@@ -108,7 +108,10 @@ call plug#begin('~/.config/nvim')
     Plug 'tpope/vim-rhubarb'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
+	"Theme
     Plug 'joshdick/onedark.vim'
+	Plug 'rebelot/kanagawa.nvim'
+
     Plug 'airblade/vim-rooter' 
     Plug 'nvim-lua/plenary.nvim'
     Plug 'nvim-telescope/telescope.nvim'
@@ -143,12 +146,17 @@ call plug#begin('~/.config/nvim')
 
 	"easy motion
 	Plug 'easymotion/vim-easymotion'
+	" github copilot
+	Plug 'github/copilot.vim'
+	
+
 call plug#end()
 
 " }}}
 "COLOR SCHEME\
-set background=dark
-colorscheme onedark
+"set background=dark
+colorscheme kanagawa
+
 "lua require('user.options')
 "lua print('this also works')
 lua require('user.options')
@@ -243,31 +251,6 @@ require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snipp
 	table.insert(runtime_path, "lua/?.lua")
 	table.insert(runtime_path, "lua/?/init.lua")
 
-	require'lspconfig'.sumneko_lua.setup {
-	  settings = {
-		Lua = {
-		  runtime = {
-			-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-			version = 'LuaJIT',
-			-- Setup your lua path
-			path = runtime_path,
-		  },
-		  diagnostics = {
-			-- Get the language server to recognize the `vim` global
-			globals = {'vim'},
-		  },
-		  workspace = {
-			-- Make the server aware of Neovim runtime files
-			library = vim.api.nvim_get_runtime_file("", true),
-		  },
-		  -- Do not send telemetry data containing a randomized but unique identifier
-		  telemetry = {
-			enable = false,
-		  },
-		},
-	  },
-	}
-	require'lspconfig'.sumneko_lua.setup{}
 --Setup odin autocomplete with OLS
 	local lspconfig = require'lspconfig'
 	local configs = require'lspconfig/configs'
