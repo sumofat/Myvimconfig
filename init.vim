@@ -78,6 +78,7 @@ filetype plugin indent on   "allow auto-indenting depending on file type
 " There are certain files that we would never want to edit with Vim.
 " Wildmenu will ignore files with these extensions.
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
+let g:ale_linters_ignore = {'cpp': ['cpplint']}
 
 "inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 "inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
@@ -147,8 +148,10 @@ call plug#begin('~/.config/nvim')
 	"easy motion
 	Plug 'easymotion/vim-easymotion'
 	" github copilot
-	Plug 'github/copilot.vim'
+	"Plug 'github/copilot.vim'
 	
+	"Lazygit integration
+	Plug 'kdheepak/lazygit.nvim'
 
 call plug#end()
 
@@ -187,6 +190,9 @@ let Hello = luaeval('require("user.keymaps")').OpenWindow
 "nn <C-d> :lua require("user.keymaps").OpenWindow()<CR>
 nnoremap <silent> <Leader>c :<C-u>call Hello()<CR>
 set completeopt=menu,menuone,noselect
+
+" setup mapping to call :LazyGit
+nnoremap <silent> <leader>gg :LazyGit<CR>
 
 " LSP REMAPS
 lua <<EOF
@@ -274,21 +280,22 @@ require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snipp
 	}
 
 	local nvim_lsp = require('lspconfig')
---	local on_attach = function(client, bufnr)
 
-	--buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-	
+	-- Use jedi-language-server only
+nvim_lsp.jedi_language_server.setup {
+    on_attach = function(client, bufnr)
+        -- Your existing on_attach configuration
+    end,
+    settings = {
+        jedi = {
+            completion = {
+                disableSnippets = true
+            }
+        }
+    }
+}
 
--- Use a loop to conveniently both setup defined servers
--- and map buffer local keybindings when the language server attaches
---	local servers = { "ols" }
---	for _, lsp in ipairs(servers) do
---		nvim_lsp[lsp].setup {
---			on_attach = on_attach;
---			}
---	end
-
-	-- Mappings.
+-- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = { noremap=true, silent=true }
 vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
@@ -319,9 +326,12 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
 
+require'lspconfig'.lua_ls.setup{}
+
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { 'pyright', 'rust_analyzer', 'tsserver','ols','sumneko_lua','clangd' }
+--local servers = { 'pyright', 'rust_analyzer', 'tsserver','ols','sumneko_lua','clangd' }
+local servers = { 'jedi_language_server','tsserver','ols','lua_ls'}
 for _, lsp in pairs(servers) do
   require('lspconfig')[lsp].setup {
     on_attach = on_attach,
