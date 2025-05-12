@@ -1,3 +1,4 @@
+language en_US
 " Enable folding
 set foldmethod=indent
 set foldlevel=99
@@ -25,7 +26,6 @@ set cursorline
 
 " Allow the cursor to move past the new line character for insertion
 set virtualedit=onemore
-
 
 " Highlight cursor line underneath the cursor vertically.
 "set cursorcolumn
@@ -96,23 +96,24 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 " Plugin code goes here.
 call plug#begin('~/.config/nvim')
-	Plug 'dense-analysis/ale'
+	"Plug 'dense-analysis/ale'
 	Plug 'preservim/nerdtree'
-	Plug 'neovim/nvim-lspconfig'
+"	Plug 'neovim/nvim-lspconfig'
 	Plug 'williamboman/nvim-lsp-installer'
 	Plug 'OmniSharp/omnisharp-vim'
-	Plug 'prabirshrestha/asyncomplete.vim'	
-    Plug 'airblade/vim-gitgutter'
-    Plug 'tpope/vim-fugitive'
+	"Plug 'prabirshrestha/asyncomplete.vim'	
+    "Plug 'airblade/vim-gitgutter'
+    "Plug 'tpope/vim-fugitive'
 	Plug 'vim-airline/vim-airline'
 
-    Plug 'tpope/vim-rhubarb'
+    "Plug 'tpope/vim-rhubarb'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
 	"Theme
     Plug 'joshdick/onedark.vim'
 	Plug 'rebelot/kanagawa.nvim'
 
+	"changes the root dir but why?
     Plug 'airblade/vim-rooter' 
     Plug 'nvim-lua/plenary.nvim'
     Plug 'nvim-telescope/telescope.nvim'
@@ -131,6 +132,8 @@ call plug#begin('~/.config/nvim')
     " Plug 'dcampos/nvim-snippy'
     " Plug 'dcampos/cmp-snippy'
 
+	" Plug 'm-pilia/vim-ccls'
+
     Plug 'neovim/nvim-lspconfig'
     Plug 'hrsh7th/cmp-nvim-lsp'
     Plug 'hrsh7th/cmp-buffer'
@@ -148,10 +151,15 @@ call plug#begin('~/.config/nvim')
 	"easy motion
 	Plug 'easymotion/vim-easymotion'
 	" github copilot
-	"Plug 'github/copilot.vim'
+	Plug 'github/copilot.vim'
 	
 	"Lazygit integration
 	Plug 'kdheepak/lazygit.nvim'
+
+	Plug 'lukas-reineke/indent-blankline.nvim'
+	"Plug 'nvimdev/dashboard-nvim'
+	" vim-plug
+	Plug 'rluba/jai.vim'
 
 call plug#end()
 
@@ -194,41 +202,47 @@ set completeopt=menu,menuone,noselect
 " setup mapping to call :LazyGit
 nnoremap <silent> <leader>gg :LazyGit<CR>
 
-" LSP REMAPS
 lua <<EOF
+vim.g.python3_host_prog = 'C:/Python312/python.exe'
+
+vim.filetype.add({
+  extension = {
+    jai = "jai",  
+}})
+
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snippets folder
 -- If path is not specified, luasnip will look for the `snippets` directory in rtp (for custom-snippet probably
 -- `~/.config/nvim/snippets`).
 
 -- You dont need to set any of these options. These are the default ones. Only
-   -- the loading is important
-   require('telescope').setup {
-	   extensions = {
-		   fzf = {
-			   fuzzy = true,                    -- false will only do exact matching
-			   override_generic_sorter = true,  -- override the generic sorter
-			   override_file_sorter = true,     -- override the file sorter
-			   case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-			   -- the default case_mode is "smart_case"
-		   }
-	   }
-   }
-   -- To get fzf loaded and working with telescope, you need to call
-   -- load_extension, somewhere after setup function:
-   require('telescope').load_extension('fzf') 
+    -- the loading is important
+    require('telescope').setup {
+      extensions = {
+        fzf = {
+          fuzzy = true,                    -- false will only do exact matching
+          override_generic_sorter = true,  -- override the generic sorter
+          override_file_sorter = true,     -- override the file sorter
+          case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+          -- the default case_mode is "smart_case"
+        }
+      }
+    }
+    -- To get fzf loaded and working with telescope, you need to call
+    -- load_extension, somewhere after setup function:
+    require('telescope').load_extension('fzf')  
 
-   -- Setup nvim-cmp.
+    -- Setup nvim-cmp.
   local cmp = require'cmp'
 
   cmp.setup({
     snippet = {
       -- REQUIRED - you must specify a snippet engine
       expand = function(args)
---		vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-		require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+--        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
 
-		-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
         -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
       end,
     },
@@ -244,8 +258,8 @@ require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snipp
       ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     },
     sources = cmp.config.sources({
-		{ name = 'nvim_lsp' },
-		{ name = 'luasnip' }, -- For luasnip users.
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' }, -- For luasnip users.
 --        { name = 'vsnip' }, -- For vsnip users.
       -- { name = 'ultisnips' }, -- For ultisnips users.
       -- { name = 'snippy' }, -- For snippy users.
@@ -253,47 +267,119 @@ require("luasnip.loaders.from_snipmate").load() -- Load s./nippets from my-snipp
       { name = 'buffer' },
     })
   })
-	local runtime_path = vim.split(package.path, ';')
-	table.insert(runtime_path, "lua/?.lua")
-	table.insert(runtime_path, "lua/?/init.lua")
+
+local runtime_path = vim.split(package.path, ';')
+table.insert(runtime_path, "lua/?.lua")
+table.insert(runtime_path, "lua/?/init.lua")
 
 --Setup odin autocomplete with OLS
-	local lspconfig = require'lspconfig'
-	local configs = require'lspconfig/configs'
+local lspconfig = require'lspconfig'
+local configs = require'lspconfig.configs'
 
-	-- Check if it's already defined for when reloading this file.
-	if not lspconfig.ols then
-		configs.ols = {
-			default_config = {
-				cmd = {'ols'};
-				filetypes = {'odin'};
-				root_dir = function(fname)
+-- Check if it's already defined for when reloading this file.
+if not lspconfig.ols then
+	configs.ols = {
+		default_config = {
+			cmd = {'ols'};
+			filetypes = {'odin'};
+			root_dir = function(fname)
 				return lspconfig.util.find_git_ancestor(fname) or vim.loop.os_homedir()
 			end;
 			settings = {};
-			};
-		}
-	end
-
-	lspconfig.ols.setup{
-		root_dir = lspconfig.util.root_pattern("ols.json");
+		};
 	}
+end
 
-	local nvim_lsp = require('lspconfig')
-
-	-- Use jedi-language-server only
-nvim_lsp.jedi_language_server.setup {
-    on_attach = function(client, bufnr)
-        -- Your existing on_attach configuration
-    end,
-    settings = {
-        jedi = {
-            completion = {
-                disableSnippets = true
-            }
-        }
-    }
+lspconfig.ols.setup{
+	root_dir = lspconfig.util.root_pattern("ols.json");
 }
+
+--local lspconfig = require'lspconfig'
+--local configs = require'lspconfig/configs'
+--Setup odin autocomplete with ails for jai
+configs.jails = {
+	default_config = {
+		cmd = { "jails.exe" },
+		filetypes = { "jai" },
+		--root_dir = lspconfig.util.path.dirname,
+		root_dir = function(fname)
+			return lspconfig.util.find_git_ancestor(fname) or vim.loop.os_homedir()
+		end;
+		--root_dir = lspconfig.util.root_pattern("jails.json", ".git"), -- Adjust to find the project root
+		-- Optional: Define settings if necessary
+		settings = {}, -- You can add specific settings if required by the LSP server
+		settings = {
+			jails = {
+				enabled = { "jai" },
+			}
+		}
+	};
+}
+
+lspconfig.jails.setup{
+	on_attach = function(client, bufnr)
+		if client.server_capabilities.semanticTokensProvider then
+			vim.lsp.buf.semantic_tokens_full()
+		end
+	end,
+	root_dir = lspconfig.util.root_pattern("jails.json"), -- Look for jails.json in the root
+}
+
+configs.omnisharp = {
+	default_config = {
+		--cmd = {
+			--'C:/ProgramData/chocolatey/bin/OmniSharp.exe', -- <<<--- UPDATE THIS LINE IF YOUR PATH IS DIFFERENT
+			--'--languageserver', -- Tells OmniSharp to start in LSP mode
+			--'--hostPID', tostring(vim.fn.getpid()) -- Helps OmniSharp manage its process lifecycle
+		--},
+		cmd = {
+			'dotnet',
+			'C:/Users/ray.garner/AppData/Local/nvim-data/lsp_servers/omnisharp/omnisharp/OmniSharp.dll',
+			'--languageserver',
+			'--hostPID', tostring(vim.fn.getpid())
+		},
+		--cmd = {"C:/Users/ray.garner/AppData/Local/nvim-data/lsp_servers/omnisharp/omnisharp/OmniSharp.exe"},
+		--cmd = { "C:/ProgramData/chocolatey/bin/OmniSharp.exe" },
+		--cmd = { "OmniSharp" },
+		filetypes = { "cs"}, -- Add "vb" if you use VB.NET
+		root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", ".git"), -- Adjust to find the project root
+		--settings = {}, -- You can add specific settings if required by the LSP server
+	};
+}
+
+lspconfig.omnisharp.setup{
+	on_attach = function(client, bufnr)
+		if client.server_capabilities.semanticTokensProvider then
+			vim.lsp.buf.semantic_tokens_full()
+		end
+	end,
+	root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", ".git"), -- Look for solution or project files in the root
+}
+
+local nvim_lsp = require('lspconfig') -- Note: lspconfig is already required above. nvim_lsp is now an alias for it.
+
+-- Use jedi-language-server only
+nvim_lsp.jedi_language_server.setup {
+	on_attach = function(client, bufnr)
+		-- Your existing on_attach configuration (currently empty, global on_attach will likely be used due to the loop setup below)
+	end,
+	settings = {
+		jedi = {
+			completion = {
+				disableSnippets = true
+			}
+		}
+	}
+}
+
+--require'lspconfig'.clangd.setup{}
+--local lspconfig = require('lspconfig')
+--lspconfig.clangd.setup({
+--  cmd = {'clangd', '--background-index'},
+--  init_options = {
+--    fallbackFlags = { '-std=c++17' },
+--  },
+--})
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -324,14 +410,44 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  vim.api.nvim_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', { noremap = true, silent = true })
 end
 
-require'lspconfig'.lua_ls.setup{}
+-- lspconfig is already required and assigned to 'lspconfig' and 'nvim_lsp'
+-- local lspconfig = require('lspconfig') -- This is redundant
 
+--lspconfig.ccls.setup {
+--  filetypes = { "h","c", "cpp", "objc", "objcpp" },
+--  init_options = {
+--    root_dir = lspconfig.util.root_pattern("compile_commands.json", ".git"), -- Ensure proper root detection
+--    compilationDatabaseDirectory = "build", -- Adjust based on your project
+--    index = {
+--      threads = 2; -- Number of threads for indexing
+--    },
+--    clang = {
+--    },
+--    log = {
+--        verbose = true; -- Enable verbose logging
+--    },
+--  },
+  -- Optional: Customize LSP key mappings
+--  on_attach = function(client, bufnr)
+--    local bufopts = { noremap=true, silent=true, buffer=bufnr }
+--    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts) -- Go to definition
+--    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)      -- Hover
+--  end,
+--}
+--require('lspconfig').clangd.setup {
+ --   cmd = { "clangd" },
+  --  filetypes = { "c", "cpp", "objc", "objcpp" },
+  --  root_dir = require('lspconfig').util.root_pattern("compile_commands.json", ".git"),
+--}
+
+--require'lspconfig'.lua_ls.setup{} -- Assuming you want default setup for lua_ls. If it's in the loop, this might be redundant.
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
---local servers = { 'pyright', 'rust_analyzer', 'tsserver','ols','sumneko_lua','clangd' }
-local servers = { 'jedi_language_server','tsserver','ols','lua_ls'}
+-- Added 'omnisharp' to this list
+local servers = { 'jails','jedi_language_server','tsserver','ols','lua_ls','clangd', 'omnisharp' }
 for _, lsp in pairs(servers) do
   require('lspconfig')[lsp].setup {
     on_attach = on_attach,
@@ -339,15 +455,51 @@ for _, lsp in pairs(servers) do
       -- This will be the default in neovim 0.7+
       debounce_text_changes = 150,
     }
+    -- If you plan to use nvim-cmp capabilities, you would define 'capabilities'
+    -- (like your commented out section at the end) and pass it here:
+    -- capabilities = capabilities_variable,
   }
 end
-	-- Set configuration for specific filetype.
+--[[
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.jai = {
+    install_info = {
+        -- path to tree-sitter repository
+        url = vim.fn.stdpath("config") .. "/external/tree-sitter-jai/",
+        files = { "src/parser.c" },
+    },
+    filetype = "jai",
+    filetype_to_parsername = "jai",
+    indent = {
+        enable = true
+    }
+}
+
+require('nvim-treesitter.configs').setup {
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+    },
+    indent = {
+        enable = true,
+    },
+    ensure_installed = {"jai"}, -- Add "jai" here if needed, or leave it empty
+}
+vim.filetype.add({
+    extension = {
+        jai = "jai",
+    },
+})
+--]]
+
+
+    -- Set configuration for specific filetype.
  -- cmp.setup.filetype('gitcommit', {
  --  sources = cmp.config.sources({
- --     { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it. 
- --   }, {
- --     { name = 'buffer' },
- --   })
+ --      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.  
+ --    }, {
+ --      { name = 'buffer' },
+ --    })
  -- })
 
   -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
@@ -373,3 +525,4 @@ end
   --  capabilities = capabilities
   --}
 EOF
+

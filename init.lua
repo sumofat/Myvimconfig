@@ -236,6 +236,10 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
 require("lazy").setup({
+    --easymotion
+    {
+        "easymotion/vim-easymotion",
+    },
     --snacks
     {
         "folke/snacks.nvim",
